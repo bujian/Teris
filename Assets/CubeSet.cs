@@ -34,32 +34,30 @@ public class CubeSet : MonoBehaviour
 
     private void Awake()
     {
-        cubes_offset = new List<Vect2[]>
-        {
-             new Vect2[] {  new Vect2(0,2), new Vect2(1,2),  new Vect2(1,1),  new Vect2(2,1) },
-             new Vect2[] {  new Vect2(1,0), new Vect2(1,1),  new Vect2(2,1),  new Vect2(2,2) },
-             new Vect2[] {  new Vect2(0,1), new Vect2(1,1),  new Vect2(1,0),  new Vect2(2,0) },
-             new Vect2[] {  new Vect2(0,0), new Vect2(0,1),  new Vect2(1,1),  new Vect2(1,2) },
-        };
+    }
 
-        MaxStateCount = cubes_offset[0].Length;
+    public void Randomize()
+    {
 
-        for (int i = 0; i < MaxStateCount; i++)
+        int dataindex = UnityEngine.Random.Range(0, CubeSetData.Data.Length);
+        print(dataindex);
+        cubes_offset = CubeSetData.Data[dataindex];
+        MaxStateCount = cubes_offset.Count;
+        _state = UnityEngine.Random.Range(0, MaxStateCount);
+        SetData(cubes_offset);
+    }
+
+    void SetData(List<Vect2[]> data)
+    {
+        cubes_offset = data;
+
+        for (int i = 0; i < cubes_offset[0].Length; i++)
         {
             var obj = Instantiate(CopyObj);
             obj.AddComponent<SingleCubeTag>();
             obj.transform.parent = this.transform;
             CubeModels.Add(obj.transform);
         }
-
-        //SetPos(new Vect2(0,0), Vector3.zero);
-        //cubes_offset.ForEach(cubes =>
-        //{
-        //    for (int i = 0; i < cubes.Length; i++)
-        //    {
-        //        cubes[i].XPos *= -1;
-        //    }
-        //});
     }
 
     public void Rotate()

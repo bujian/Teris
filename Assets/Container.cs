@@ -46,7 +46,7 @@ public class Container : MonoBehaviour
     private void Start()
     {
         Create();
-        StartCoroutine(StartAutoMove(0.5f));
+        //StartCoroutine(StartAutoMove(0.5f));
     }
 
     private IEnumerator StartAutoMove(float v)
@@ -75,7 +75,7 @@ public class Container : MonoBehaviour
             {
                 CubeMove(CurCube, Direction.Down);
             }
-            if (Input.GetKeyDown(KeyCode.KeypadEnter))
+            if (Input.GetKeyDown(KeyCode.UpArrow))
             {
                 CubeRotate(CurCube);
             }
@@ -342,7 +342,7 @@ public class Container : MonoBehaviour
         CurCube.transform.parent = this.transform;
 
         int startX = Width / 2 - 2;
-        int startY =  Height + 1;
+        int startY =  Height;
         Vect2 startPos = new Vect2(startX, startY);
         CurCube.SetPos(startPos, OriginPos);
         SetStates(CurCube.GetCurCubeState(), false);
