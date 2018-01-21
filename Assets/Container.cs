@@ -2,30 +2,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Container : MonoBehaviour
 {
     int Width = 10;
     int Height = 20;
-
     int Height_Exp = 4;
 
     /// <summary>
     /// 位置状态 true为空  false为满
     /// </summary>
     bool[][] CubeEmptyStates;
-    Vector3 OriginPos;
-    public CubeFactory Factory;
-
-    CubeSet CurCube;
-
     public Transform LineGroup;
 
-    bool _gameover = false;
-    private void Awake()
+    public Transform FrameGroup;
+
+    public void InitContainer(int width, int height)
     {
-        int width = Width;
-        int height = Height + Height_Exp;
+        ClearLineModels();
+
+        Width = width;
+        Height = height;
+        height += Height_Exp;
         CubeEmptyStates = new bool[width][];
         for (int i = 0; i < CubeEmptyStates.Length; i++)
         {
@@ -41,72 +40,64 @@ public class Container : MonoBehaviour
             GameObject obj = new GameObject();
             obj.transform.SetParent(LineGroup);
         }
+
+        InitFrame(Width, Height, 1);
     }
 
-    private void Start()
+    void InitFrame(int width, int height, float cubeSideLen)
     {
-        Create();
-        //StartCoroutine(StartAutoMove(0.5f));
+        Vector3 ori = Vector3.zero - new Vector3(cubeSideLen / 2 , cubeSideLen / 2);
+        float fWidth = width * cubeSideLen;
+        float fHeight = height * cubeSideLen;
+
+        Transform down = FrameGroup.GetChild(0);
+        Transform left = FrameGroup.GetChild(1);
+        Transform right = FrameGroup.GetChild(2);
+
+        float leftW = left.localScale.x;
+        float downH = down.localScale.y;
+        fWidth += leftW * 2;
+        down.localScale = GetNewScale(down.localScale, fWidth, Pos.x);
+        left.localScale = GetNewScale(left.localScale, fHeight, Pos.y);
+        right.localScale = GetNewScale(right.localScale, fHeight, Pos.y);
+
+        left.localPosition = ori - new Vector3(leftW / 2, 0, 0) + new Vector3(0, fHeight / 2, 0);
+        right.localPosition = left.localPosition + new Vector3(cubeSideLen * width + leftW, 0, 0);
+        down.localPosition = ori + new Vector3(fWidth /2 - leftW, 0, 0) - new Vector3(0, downH / 2, 0);
     }
 
-    private IEnumerator StartAutoMove(float v)
+    Vector3 GetNewScale(Vector3 pos, float v, Pos p)
     {
-        while (!_gameover)
+        switch (p)
         {
-            yield return new WaitForSeconds(v);
-            CubeMove(CurCube, Direction.Down);
-        }
-        print("Stop Move");
-    }
-
-    private void Update()
-    {
-        if (!_gameover)
-        {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                CubeMove(CurCube, Direction.Left);
-            }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                CubeMove(CurCube, Direction.Right);
-            }
-            if (Input.GetKey(KeyCode.DownArrow))
-            {
-                CubeMove(CurCube, Direction.Down);
-            }
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                CubeRotate(CurCube);
-            }
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                for (int i = 0; i < CubeEmptyStates.Length; i++)
+            case Pos.x:
                 {
-                    string s = i + ": ";
-                    for (int j = 0; j < CubeEmptyStates[i].Length; j++)
-                    {
-                        s += CubeEmptyStates[i][j] ? 1 : 0;
-                    }
-                    print(s);
+                    pos.x = v;
                 }
-            }
+                break;
+            case Pos.y:
+                {
+                    pos.y = v;
+                }
+                break;
+            case Pos.z:
+                {
+                    pos.z = v;
+                }
+                break;
         }
+        return pos;
     }
 
-    void ClearStates()
+    void ClearLineModels()
     {
-        for (int i = 0; i < CubeEmptyStates.Length; i++)
+        for (int i = 0; i < LineGroup.childCount; i++)
         {
-            for (int j = 0; j < CubeEmptyStates[i].Length; j++)
-            {
-                CubeEmptyStates[i][j] = true;
-            }
+            Destroy(LineGroup.GetChild(i).gameObject);
         }
     }
 
-
-    bool CanMove(CubeSet cube ,Direction d)
+    public bool CanMove(CubeSet cube, Direction d)
     {
         bool ret = true;
         Predicate<Vect2> judgecon = null;
@@ -143,7 +134,7 @@ public class Container : MonoBehaviour
         return ret;
     }
 
-    bool CanRotate(CubeSet cube)
+    public bool CanRotate(CubeSet cube)
     {
         bool ret = true;
         Vect2[] nextRange = cube.GetRotRange();
@@ -158,39 +149,10 @@ public class Container : MonoBehaviour
         }
         return ret;
     }
-
-    private void CubeMove(CubeSet cube ,Direction dir)
-    {
-        if (CanMove(cube, dir))
-        {
-            SetStates(cube.GetCurCubeState(), true);
-            cube.MoveTo(dir);
-            SetStates(cube.GetCurCubeState(), false);
-        }
-        else
-        {
-            if (dir == Direction.Down)
-            {
-                TransferCubes();
-                RemoveLineCubes();
-                if (IsGameOver())
-                {
-                    _gameover = true;
-                    print("Game Over");
-                }
-                else
-                {
-                    Create();
-                    print("Next");
-                }
-            }
-        }
-    }
-
-    bool IsGameOver()
+    public bool IsGameOver(CubeSet cube)
     {
         bool ret = false;
-        Vect2[] bors = CurCube.GetBorder(Direction.Left);
+        Vect2[] bors = cube.GetBorder(Direction.Left);
         for (int i = 0; i < bors.Length; i++)
         {
             int line = bors[i].YPos;
@@ -202,10 +164,9 @@ public class Container : MonoBehaviour
         }
         return ret;
     }
-
-    private void RemoveLineCubes()
+    public void RemoveLineCubes(CubeSet cube)
     {
-        Vect2[] linepoints = CurCube.GetBorder(Direction.Left);
+        Vect2[] linepoints = cube.GetBorder(Direction.Left);
         int startIndex = -1;
         int downStep = 0;
         //消除同行
@@ -226,11 +187,11 @@ public class Container : MonoBehaviour
             int lineCount = CubeEmptyStates[0].Length;
             for (int i = startIndex; i < lineCount; i++)
             {
+                print(i);
                 MoveDownAfterMove(i, downStep);
             }
         }
     }
-
     /// <summary>
     /// 消掉一行，清楚状态，上面下移，状态再改便
     /// </summary>
@@ -301,32 +262,29 @@ public class Container : MonoBehaviour
 
     }
 
-    private void TransferCubes()
+    public void TransferCubes(CubeSet cube)
     {
-        List<Transform> children = CurCube.LetChildrenGo();
-        children.ForEach(child =>
+        try
         {
-            var tag = child.GetComponent<SingleCubeTag>().Pos;
-            child.SetParent(LineGroup.GetChild(tag.YPos));
-        });
-        Destroy(CurCube.gameObject);
+            List<Transform> children = cube.LetChildrenGo();
+            children.ForEach(child =>
+            {
+                var tag = child.GetComponent<SingleCubeTag>().Pos;
+                child.SetParent(LineGroup.GetChild(tag.YPos));
+            });
+            Destroy(cube.gameObject);
+        }
+        catch (Exception ex)
+        {
+            print(ex.Message);
+            throw;
+        }
+
     }
 
-    void CubeRotate(CubeSet cube)
-    {
-        if (CanRotate(cube))
-        {
-            SetStates(cube.GetCurCubeState(), true);
-            cube.Rotate();
-            SetStates(cube.GetCurCubeState(), false);
-        }
-        else
-        {
 
-        }
-    }
 
-    void SetStates(Vect2[] pos, bool state)
+    public void SetStates(Vect2[] pos, bool state)
     {
         for (int i = 0; i < pos.Length; i++)
         {
@@ -335,18 +293,7 @@ public class Container : MonoBehaviour
         }
     }
 
-    void Create()
-    {
-        var obj = Factory.Create();
-        CurCube = obj.GetComponent<CubeSet>();
-        CurCube.transform.parent = this.transform;
 
-        int startX = Width / 2 - 2;
-        int startY =  Height;
-        Vect2 startPos = new Vect2(startX, startY);
-        CurCube.SetPos(startPos, OriginPos);
-        SetStates(CurCube.GetCurCubeState(), false);
-    }
 }
 
 public enum Direction
@@ -354,4 +301,11 @@ public enum Direction
     Left,
     Right,
     Down,
+}
+
+public enum Pos
+{
+    x,
+    y,
+    z
 }
