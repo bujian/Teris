@@ -36,24 +36,24 @@ public class CubeSet : MonoBehaviour
     {
     }
 
-    public void Randomize()
+    public void Randomize(int cKind)
     {
+        cubes_offset = CubeSetData.Instance.Data[cKind];
+        Color color = CubeSetData.Instance.Colors[cKind];
 
-        int dataindex = UnityEngine.Random.Range(0, CubeSetData.Data.Length);
-        print(dataindex);
-        cubes_offset = CubeSetData.Data[dataindex];
         MaxStateCount = cubes_offset.Count;
         _state = UnityEngine.Random.Range(0, MaxStateCount);
-        SetData(cubes_offset);
+        SetData(cubes_offset, color);
     }
 
-    void SetData(List<Vect2[]> data)
+    void SetData(List<Vect2[]> data, Color color)
     {
         cubes_offset = data;
 
         for (int i = 0; i < cubes_offset[0].Length; i++)
         {
             var obj = Instantiate(CopyObj);
+            obj.GetComponent<Renderer>().material.color = color;
             obj.AddComponent<SingleCubeTag>();
             obj.transform.parent = this.transform;
             CubeModels.Add(obj.transform);

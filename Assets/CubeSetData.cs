@@ -4,7 +4,38 @@ using UnityEngine;
 
 public class CubeSetData
 {
-    public static List<Vect2[]>[] Data = new List<Vect2[]>[]
+    static CubeSetData _instance;
+    public static CubeSetData Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new CubeSetData();
+            }
+            return _instance;
+        }
+    }
+
+    private CubeSetData()
+    {
+        Colors = new Color[]
+        {
+            Color.red,
+            Color.yellow,
+            Color.blue,
+            Color.cyan,
+            Color.magenta,
+            Color.black,
+            Color.white,
+        };
+        
+
+    }
+
+    public Color[] Colors;
+
+    public List<Vect2[]>[] Data = new List<Vect2[]>[]
     {
         new List<Vect2[]>
         {

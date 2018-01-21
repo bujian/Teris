@@ -8,8 +8,10 @@ public class CubeFactory : MonoBehaviour
 
     public GameObject Create()
     {
+        int dataindex = UnityEngine.Random.Range(0, CubeSetData.Instance.Data.Length);
+
         GameObject obj = Instantiate(Cubes);
-        obj.GetComponent<CubeSet>().Randomize();
+        obj.GetComponent<CubeSet>().Randomize(dataindex);
 
         return obj;
     }

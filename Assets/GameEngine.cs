@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class GameEngine : MonoBehaviour
 {
     public Container TContainer;
-    int Height = 20;
+    int Height = 30;
     int Width = 10;
     bool _gameover = false;
     public CubeFactory Factory;
