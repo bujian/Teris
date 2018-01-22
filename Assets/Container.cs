@@ -156,7 +156,7 @@ public class Container : MonoBehaviour
         for (int i = 0; i < bors.Length; i++)
         {
             int line = bors[i].YPos;
-            if (line >= Height)
+            if (line >= Height - 1)
             {
                 ret = true;
                 break;
