@@ -187,7 +187,6 @@ public class Container : MonoBehaviour
             int lineCount = CubeEmptyStates[0].Length;
             for (int i = startIndex; i < lineCount; i++)
             {
-                print(i);
                 MoveDownAfterMove(i, downStep);
             }
         }

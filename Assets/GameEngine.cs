@@ -7,24 +7,30 @@ using UnityEngine.SceneManagement;
 public class GameEngine : MonoBehaviour
 {
     public Container TContainer;
-    int Height = 30;
+    int Height = 20;
     int Width = 10;
     bool _gameover = false;
     public CubeFactory Factory;
     CubeSet CurCube;
     public Transform GameInfo;
+    public Transform PreShow;
     Vector3 OriginPos;
+
+    public float DropSpeed = 0.5f;
+
+    public int PreShowCount = 5;
 
     private void Awake()
     {
         GameInfo.gameObject.SetActive(false);
         InitContainer();
+        Factory.InitFactory(PreShowCount);
     }
 
     private void Start()
     {
         Create();
-        StartCoroutine(StartAutoMove(0.5f));
+        StartCoroutine(StartAutoMove(DropSpeed));
     }
 
     private void InitContainer()
@@ -43,6 +49,31 @@ public class GameEngine : MonoBehaviour
         Vect2 startPos = new Vect2(startX, startY);
         CurCube.SetPos(startPos, OriginPos);
         TContainer.SetStates(CurCube.GetCurCubeState(), false);
+
+        ShowPreCubes(5);
+        print("Create");
+    }
+
+    private void ShowPreCubes(int count)
+    {
+        for (int i = 0; i < PreShow.childCount; i++)
+        {
+            Destroy(PreShow.GetChild(i).gameObject);
+        }
+
+        int sideLength = 1;
+        Vector3 oriPos = Vector3.zero + new Vector3(0, sideLength / 2);
+        int del = sideLength * 4;
+        List<GameObject> objs = Factory.PreCreate(count);
+        for (int i = 0; i < objs.Count; i++)
+        {
+            var obj = objs[i];
+            obj.transform.parent = PreShow;
+            obj.transform.localPosition = oriPos + new Vector3(0, i * del, 0);
+            var cube = obj.GetComponent<CubeSet>();
+            cube.SetPos(new Vect2(0,0), OriginPos);
+        }
+
     }
 
     private IEnumerator StartAutoMove(float v)
@@ -77,6 +108,7 @@ public class GameEngine : MonoBehaviour
                 else
                 {
                     Create();
+
                 }
             }
         }

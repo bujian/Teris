@@ -32,17 +32,13 @@ public class CubeSet : MonoBehaviour
 
     public int Step = 1;
 
-    private void Awake()
-    {
-    }
-
-    public void Randomize(int cKind)
+    public void Randomize(int cKind, int sKind)
     {
         cubes_offset = CubeSetData.Instance.Data[cKind];
         Color color = CubeSetData.Instance.Colors[cKind];
 
         MaxStateCount = cubes_offset.Count;
-        _state = UnityEngine.Random.Range(0, MaxStateCount);
+        _state = sKind;
         SetData(cubes_offset, color);
     }
 
